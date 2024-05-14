@@ -1,0 +1,86 @@
+
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Amabreleenca
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+
+            var prompt = "desert"; // detta ska komma från unity
+            CreatePrediction(prompt); // kör den här metoden när knappen trycks
+#if DEBUG
+            Console.WriteLine("Press enter to close...");
+            Console.ReadLine();
+#endif
+
+        }
+
+        public static void CreatePrediction(string prompt)
+        {
+            HttpClient httpClient = new HttpClient(); // skapa en http client
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer r8_GVdXe4Sh16z8mTrH3MkcrIsdRpHW4LJ1xd6SH"); // lägg till header med din token 
+
+            var requestUri = "https://api.replicate.com/v1/predictions"; 
+            var requestMessage = new HttpRequestMessage(); //eftersom det är en post så ska man skicka in data
+
+            var payload = new Payload()
+            {
+                version = "154b3e5141493cb1b8cec976d9aa90f2b691137e39ad906d2421b74c2a8c52b8",
+                input  = new Input()
+                {
+                    prompt = prompt,
+                    duration = 5,
+                    output_format = "mp3"
+                }
+            };
+            var stringPayload = JsonConvert.SerializeObject(payload); // här görs payloaden om till JSON
+
+            requestMessage.Content = new StringContent(stringPayload, Encoding.UTF8, "application/json"); // här lägger du in din body i requesten
+
+         
+            var response = httpClient.PostAsync(requestUri, requestMessage.Content); // här görs själva anropet
+            Console.WriteLine(response.Result);
+
+        }
+
+        public async static void ListPredictions()
+        {
+            // hämtar en lista på alla idn för dina predictions
+        }
+
+        public async static void GetPrediction()
+        {
+            HttpClient httpClient = new HttpClient();
+            var requestUri = "https://api.replicate.com/v1/predictions/gwe00bfdp9rgm0cfeygttc66a0";
+
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer r8_GVdXe4Sh16z8mTrH3MkcrIsdRpHW4LJ1xd6SH");
+
+
+            var response = httpClient.GetAsync(requestUri);
+            Console.WriteLine(response.Result);
+
+        }
+         public class Payload
+        {
+            public string version { get; set; }
+            public Input input { get; set; }
+        }
+
+        public class Input
+        {
+            public string prompt { get; set; }
+            public int duration { get; set; }
+            public string output_format { get; set; }
+        }
+    }
+
+   
+}
